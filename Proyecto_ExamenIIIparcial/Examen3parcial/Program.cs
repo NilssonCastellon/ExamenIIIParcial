@@ -1,5 +1,9 @@
+
 using Blazor.Data;
 using Examen3parcial.Data;
+using Examen3parcial.Interfaces;
+using Examen3parcial.Servicios;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +14,13 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
 MySQLConfiguration cadenaConexion = new MySQLConfiguration(builder.Configuration.GetConnectionString("MySQL"));
+builder.Services.AddSingleton(cadenaConexion);
 
+builder.Services.AddScoped<IUsuarioServicios, UsuarioServicio>();
+
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,11 +37,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
 app.MapControllers();
 
+app.MapFallbackToPage("/_Host");
+
 app.Run();
-
-
-
